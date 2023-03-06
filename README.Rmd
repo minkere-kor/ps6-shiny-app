@@ -1,0 +1,15 @@
+---
+title: "README"
+author: "Minkyu Kim"
+date: "2023-03-06"
+output: html_document
+---
+
+The data comes from the UAH's measurement of global troposphere data over the years 1978 and 2023 in Celsius.
+
+The widgets and panels of the plot page changes the range of years that the troposphere reaches, the color palette of the set, and the regions of measurement. The average mean of all of the selected regions in the range of time is displayed beneath the plot.
+
+The data in the table can be modified by two widgets that can filter the range of years and months that you want the data to be from. The average mean of the selected data can be seen above the table.
+
+The link to the Shiny
+https://minkere.shinyapps.io/ps6-shiny-app/

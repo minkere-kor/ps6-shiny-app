@@ -31,10 +31,18 @@ ui <- fluidPage(
                  p("This Page provides a plot where you can analyze global trends in temperature.
                  The color palette of the graph can be changed as well which years and regions where you want to see trends for.
                  The mean of the temperature for the regions and years provided is shown at the bottom of the plot"),
-                 sliderInput("year", "Select Year Range", min = 1978, max = 2023, value = 2023),
                  
-                 radioButtons("color", "Choose Color Palette",
-                              choices = c("Set1", "Set2", "Set3")),
+                 sliderInput("year",
+                             "Select Year Range",
+                             min = 1978,
+                             max = 2023,
+                             value = c(1978, 2023)
+                             ),
+                 
+                 radioButtons("color",
+                              "Choose Color Palette",
+                              choices = c("Set1", "Set2", "Set3")
+                              ),
                  
                  checkboxGroupInput("regions",
                                     "Select a Region",
@@ -54,14 +62,27 @@ ui <- fluidPage(
              
              sidebarLayout(
                sidebarPanel(
-                 checkboxGroupInput("filterby",
-                                    "Filter by:",
-                                    choices = names(troposphere),
-                                    selected = names(troposphere)),
+                 p("This page provides a table where you can modify the range of the
+                   month and years of the regions tropographic changes.
+                   Above the table the average mean of tropographic temperature can be found."),
+                 sliderInput("yearfilter",
+                             "Select Year Range:",
+                             min = 1978,
+                             max = 2023,
+                             value = c(1973, 2023)
+                             ),
+                 
+                 sliderInput("monthfilter",
+                             "Select Month Range:",
+                             min = 1,
+                             max = 12,
+                             value = c(1, 12)
+                             )
                ),
                
                mainPanel(
-                 p("awagga"),
+                 textOutput("tableInfo"),
+                 
                  dataTableOutput("tropTable")
                )
              )
@@ -81,7 +102,8 @@ server <- function(input, output) {
       troposphere %>% 
         mutate(timeframe = year + month/12) %>% 
         filter(region %in% input$regions) %>% 
-        filter(timeframe <= input$year)
+        filter(timeframe >= input$year[1],
+               timeframe <= input$year[2])
     })
     
     output$tropPlot <- renderPlot({
@@ -97,13 +119,27 @@ server <- function(input, output) {
       tropospherePlot() %>% 
         pull(temp) %>% 
         mean(., 2) %>% 
-        paste("The average temperature for the given year range and region is:", .)
+        paste("The average global temperature for the given year range and region is:", .)
     })
     
   # Table Information  
     output$tropTable <- renderDataTable({
       troposphere %>% 
-        select(input$filterby)
+        filter(year >= input$yearfilter[1],
+               year <= input$yearfilter[2],
+               month >= input$monthfilter[1],
+               month <= input$monthfilter[2])
+    })
+    
+    output$tableInfo <- renderText({
+      troposphere %>% 
+        filter(year >= input$yearfilter[1],
+               year <= input$yearfilter[2],
+               month >= input$monthfilter[1],
+               month <= input$monthfilter[2]) %>% 
+        pull(temp) %>% 
+        mean(., 2) %>% 
+        paste("The average global temperature for the given year and month range is:", .)
     })
 }
 
